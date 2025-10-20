@@ -1,468 +1,204 @@
-document.addEventListener('DOMContentLoaded', function() {
-    let isAdmin = false;
-    let allMovies = [];
+/ Fetch movies and render slider + grid
+let movies = []
+const slider = document.getElementById('slider')
+const grid = document.getElementById('grid')
+const searchInput = document.getElementById('searchInput')
+const modal = document.getElementById('modal')
+const videoPlayer = document.getElementById('videoPlayer')
+const modalTitle = document.getElementById('modalTitle')
+const modalDesc = document.getElementById('modalDesc')
+const closeModal = document.getElementById('closeModal')
+const prevBtn = document.getElementById('prevBtn')
+const nextBtn = document.getElementById('nextBtn')
+const sliderTitle = document.getElementById('sliderTitle')
 
-    // Load movies from API
-    async function loadMovies() {
-        try {
-            const response = await fetch('/api/movies');
-            allMovies = await response.json();
-            displayMovies();
-            initializeSlider();
-        } catch (error) {
-            console.error('Error loading movies:', error);
-            // Fallback to sample data
-            loadSampleMovies();
-        }
+let slideIndex = 0
+let slideTimer = null
+
+async function loadMovies(){
+  try{
+    const res = await fetch('/movies')
+    movies = await res.json()
+  }catch(e){
+    console.error('Fetch failed, using local sample')
+    movies = []
+  }
+  renderSlider()
+  renderGrid()
+  startAutoSlide()
+}
+
+function renderSlider(){
+  const trending = movies.filter(m=>m.trending)
+  slider.innerHTML = ''
+  trending.forEach((m, i)=>{
+    const div = document.createElement('div')
+    div.className = 'slide'
+    div.innerHTML = ''
+    div.innerHTML += '<img src="'+m.thumbnail+'" alt="'+m.title+'" />'
+    div.innerHTML += '<div class="slide-content"><h3>'+m.title+'</h3><p>'+m.description+'</p><div style="margin-top:12px">'
+    div.innerHTML += '<button class="btn play" onclick="openPlayer(\''+m.id+'\')">Play</button>'
+    if(m.type==='google-drive'){
+      div.innerHTML += '<a class="btn dl" href="'+m.source+'" target="_blank">Download</a>'
+    } else {
+      div.innerHTML += '<button class="btn dl" onclick="openPlayer(\''+m.id+'\',\'download\')">Download</button>'
     }
+    div.innerHTML += '</div></div>'
+    slider.appendChild(div)
+  })
+  if(slideIndex >= slider.children.length) slideIndex = 0
+  updateSliderPosition()
+}
 
-    // Fallback sample data
-    function loadSampleMovies() {
-        allMovies = [
-            {
-                id: 1,
-                title: "Mwamba wa Maisha",
-                genre: "Drama",
-                year: "2023",
-                rating: "4.5",
-                category: "trending",
-                description: "Drama ya kisasa inayoelezea maisha ya vijana katika mji wa Dar es Salaam.",
-                poster: "https://images.unsplash.com/photo-1485846234645-a62644f84728?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-                backdrop: "https://images.unsplash.com/photo-1485846234645-a62644f84728?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-                free: true
-            },
-            {
-                id: 2,
-                title: "Kivuli cha Mapenzi",
-                genre: "Romance",
-                year: "2023", 
-                rating: "4.2",
-                category: "trending",
-                description: "Mapenzi yanayokabiliana na changamoto za kijamii na kifamilia.",
-                poster: "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-                backdrop: "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-                free: true
-            }
-        ];
-        displayMovies();
-        initializeSlider();
+function updateSliderPosition(){
+  const width = slider.children[0] ? slider.children[0].offsetWidth + 16 : 0
+  slider.scrollTo({ left: width * slideIndex, behavior: 'smooth' })
+}
+
+function startAutoSlide(){
+  if(slideTimer) clearInterval(slideTimer)
+  slideTimer = setInterval(()=>{ slideIndex = (slideIndex+1) % Math.max(1, slider.children.length); updateSliderPosition() }, 4500)
+  slider.addEventListener('mouseenter', ()=>{ clearInterval(slideTimer) })
+  slider.addEventListener('mouseleave', ()=>{ startAutoSlide() })
+}
+
+prevBtn && prevBtn.addEventListener('click', ()=>{ slideIndex = Math.max(0, slideIndex-1); updateSliderPosition() })
+nextBtn && nextBtn.addEventListener('click', ()=>{ slideIndex = Math.min(slider.children.length-1, slideIndex+1); updateSliderPosition() })
+
+function renderGrid(filter=''){
+  grid.innerHTML = ''
+  const list = movies.filter(m => m.title.toLowerCase().includes(filter.toLowerCase()))
+  list.forEach(m=>{
+    const card = document.createElement('div')
+    card.className = 'card'
+    card.innerHTML = ''
+    card.innerHTML += '<img src="'+m.thumbnail+'" alt="'+m.title+'" />'
+    card.innerHTML += '<h4>'+m.title+'</h4>'
+    card.innerHTML += '<p>'+m.description+'</p>'
+    card.innerHTML += '<div class="actions">'
+    card.innerHTML += '<button class="btn play" onclick="openPlayer(\''+m.id+'\')">Play</button>'
+    if(m.type==='google-drive'){
+      card.innerHTML += '<a class="btn dl" href="'+m.source+'" target="_blank">Download</a>'
+    } else {
+      card.innerHTML += '<button class="btn dl" onclick="openPlayer(\''+m.id+'\',\'download\')">Download</button>'
     }
+    card.innerHTML += '</div>'
+    grid.appendChild(card)
+  })
+}
 
-    // Display movies in sections
-    function displayMovies() {
-        const categories = {
-            trendingMovies: 'trending',
-            hollywoodMovies: 'hollywood', 
-            bollywoodMovies: 'bollywood',
-            swahiliMovies: 'swahili'
-        };
+searchInput && searchInput.addEventListener('input', (e)=> renderGrid(e.target.value))
 
-        for (const [containerId, category] of Object.entries(categories)) {
-            const container = document.getElementById(containerId);
-            if (!container) continue;
-            
-            container.innerHTML = '';
-            
-            const categoryMovies = allMovies.filter(movie => movie.category === category);
-            
-            categoryMovies.forEach(movie => {
-                const movieCard = createMovieCard(movie);
-                container.appendChild(movieCard);
-            });
-        }
+window.openPlayer = function(id, action){
+  const m = movies.find(x=>x.id===id)
+  if(!m) return
+  if(action==='download' && m.type==='m3u8'){
+    window.open(m.source,'_blank')
+    return
+  }
+  if(m.type === 'google-drive'){
+    window.open(m.source,'_blank')
+    return
+  }
+  modalTitle.textContent = m.title
+  modalDesc.textContent = m.description
+  videoPlayer.pause()
+  videoPlayer.removeAttribute('src')
+  if(m.type==='m3u8' && window.Hls && Hls.isSupported()){
+    const hls = new Hls()
+    hls.loadSource(m.source)
+    hls.attachMedia(videoPlayer)
+    videoPlayer.play().catch(()=>{})
+  }else{
+    videoPlayer.src = m.source
+    videoPlayer.play().catch(()=>{})
+  }
+  modal.classList.remove('hidden')
+}
+
+closeModal && closeModal.addEventListener('click', ()=>{ modal.classList.add('hidden'); try{ videoPlayer.pause(); videoPlayer.removeAttribute('src'); }catch(e){} })
+
+// Admin page functions (if on admin.html)
+async function adminInit(){
+  const passInput = document.getElementById('adminPass')
+  const loginBtn = document.getElementById('loginBtn')
+  const loginCard = document.getElementById('loginCard')
+  const adminPanel = document.getElementById('adminPanel')
+  const form = document.getElementById('movieForm')
+  const moviesList = document.getElementById('moviesList')
+
+  loginBtn.addEventListener('click', async ()=>{
+    const pass = passInput.value.trim()
+    if(pass==='Sila25'){
+      loginCard.classList.add('hidden')
+      adminPanel.classList.remove('hidden')
+      await loadMovies()
+      renderAdminList()
+    }else{
+      alert('Wrong password')
     }
+  })
 
-    // Create movie card
-    function createMovieCard(movie) {
-        const movieCard = document.createElement('div');
-        movieCard.className = 'movie-card';
-        movieCard.innerHTML = `
-            ${movie.free ? '<div class="free-badge">BURE</div>' : ''}
-            <img src="${movie.poster}" alt="${movie.title}" class="movie-poster" onerror="this.src='https://images.unsplash.com/photo-1594909122845-11baa439b7bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'">
-            <div class="movie-info">
-                <h3 class="movie-title">${movie.title}</h3>
-                <div class="movie-meta">
-                    <span>${movie.year}</span>
-                    <span>★ ${movie.rating}</span>
-                </div>
-            </div>
-        `;
-        
-        movieCard.addEventListener('click', () => {
-            playMovie(movie);
-        });
-        
-        return movieCard;
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault()
+    const payload = {
+      title: document.getElementById('title').value,
+      description: document.getElementById('desc').value,
+      thumbnail: document.getElementById('thumbnail').value || 'assets/posters/avatar.jpg',
+      source: document.getElementById('source').value,
+      type: document.getElementById('type').value,
+      trending: document.getElementById('trending').checked
     }
-
-    // Initialize slider
-    function initializeSlider() {
-        const sliderContainer = document.getElementById('slidesContainer');
-        const sliderControls = document.getElementById('sliderControls');
-        
-        const trendingMovies = allMovies.filter(movie => movie.category === 'trending');
-        
-        sliderContainer.innerHTML = '';
-        sliderControls.innerHTML = '';
-        
-        trendingMovies.forEach((movie, index) => {
-            // Create slide
-            const slide = document.createElement('div');
-            slide.className = 'slide';
-            slide.innerHTML = `
-                <div class="slide-backdrop" style="background-image: url('${movie.backdrop}')"></div>
-                <div class="slide-content">
-                    <h1 class="slide-title">${movie.title}</h1>
-                    <p class="slide-description">${movie.description}</p>
-                    <div class="slide-actions">
-                        <button class="play-btn" onclick="playMovie(${movie.id})">
-                            <i class="fas fa-play"></i> Cheza Sasa
-                        </button>
-                        <button class="info-btn">
-                            <i class="fas fa-info-circle"></i> Maelezo Zaidi
-                        </button>
-                    </div>
-                </div>
-            `;
-            sliderContainer.appendChild(slide);
-
-            // Create slider dot
-            const dot = document.createElement('div');
-            dot.className = `slider-dot ${index === 0 ? 'active' : ''}`;
-            dot.dataset.index = index;
-            dot.addEventListener('click', () => goToSlide(index));
-            sliderControls.appendChild(dot);
-        });
-
-        // Start auto sliding if we have slides
-        if (trendingMovies.length > 0) {
-            startSlider();
-        }
+    const res = await fetch('/movies', { method:'POST', headers:{ 'Content-Type':'application/json','Authorization':'Sila25' }, body: JSON.stringify(payload) })
+    if(res.ok){
+      alert('Movie added')
+      await loadMovies()
+      renderAdminList()
+      form.reset()
+    }else{
+      alert('Error adding movie')
     }
+  })
 
-    // Slider functionality
-    let currentSlide = 0;
-    let slideInterval;
+  window.renderAdminList = function(){
+    moviesList.innerHTML = ''
+    movies.forEach(m=>{
+      const row = document.createElement('div')
+      row.className = 'movie-row'
+      row.innerHTML = ''
+      row.innerHTML += '<img src="'+m.thumbnail+'" />'
+      row.innerHTML += '<div class="meta"><h4>'+m.title+'</h4><div class="small">'+m.type+(m.trending? ' • trending' : '')+'</div></div>'
+      row.innerHTML += '<div class="ops"><button onclick="editMovie(\''+m.id+'\')">Edit</button><button onclick="deleteMovie(\''+m.id+'\')">Delete</button></div>'
+      moviesList.appendChild(row)
+    })
+  }
 
-    function goToSlide(index) {
-        const slides = document.querySelectorAll('.slide');
-        const dots = document.querySelectorAll('.slider-dot');
-        
-        if (slides.length === 0) return;
-        
-        currentSlide = index;
-        const sliderContainer = document.getElementById('slidesContainer');
-        sliderContainer.style.transform = `translateX(-${currentSlide * 100}%)`;
-        
-        // Update active dot
-        dots.forEach((dot, i) => {
-            dot.classList.toggle('active', i === currentSlide);
-        });
-        
-        resetSlideInterval();
-    }
+  window.editMovie = async function(id){
+    const m = movies.find(x=>x.id===id)
+    if(!m) return alert('Not found')
+    document.getElementById('title').value = m.title
+    document.getElementById('desc').value = m.description
+    document.getElementById('thumbnail').value = m.thumbnail
+    document.getElementById('source').value = m.source
+    document.getElementById('type').value = m.type
+    document.getElementById('trending').checked = m.trending
+    // delete old then add on submit (simple)
+    await fetch('/movies/'+id, { method:'DELETE', headers:{ 'Authorization':'Sila25' } })
+  }
 
-    function nextSlide() {
-        const slides = document.querySelectorAll('.slide');
-        if (slides.length === 0) return;
-        
-        currentSlide = (currentSlide + 1) % slides.length;
-        goToSlide(currentSlide);
-    }
+  window.deleteMovie = async function(id){
+    if(!confirm('Delete movie?')) return
+    const res = await fetch('/movies/'+id, { method:'DELETE', headers:{ 'Authorization':'Sila25' } })
+    if(res.ok){ await loadMovies(); renderAdminList() }
+  }
+}
 
-    function startSlider() {
-        resetSlideInterval();
-    }
-
-    function resetSlideInterval() {
-        clearInterval(slideInterval);
-        slideInterval = setInterval(nextSlide, 5000);
-    }
-
-    // Play movie function
-    window.playMovie = function(movie) {
-        if (typeof movie === 'object') {
-            alert(`🎬 Inaanza kucheza: ${movie.title}\n\n📝: ${movie.description}\n⭐ Ukadiriaji: ${movie.rating}/5`);
-        } else {
-            const movieObj = allMovies.find(m => m.id === movie);
-            if (movieObj) {
-                alert(`🎬 Inaanza kucheza: ${movieObj.title}\n\n📝: ${movieObj.description}\n⭐ Ukadiriaji: ${movieObj.rating}/5`);
-            }
-        }
-    };
-
-    // Header scroll effect
-    const header = document.getElementById('header');
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            header.classList.add('scrolled');
-        } else {
-            header.classList.remove('scrolled');
-        }
-    });
-
-    // Admin modal functionality
-    const adminBtn = document.getElementById('adminBtn');
-    const adminModal = document.getElementById('adminModal');
-    const closeModal = document.getElementById('closeModal');
-    const adminForm = document.getElementById('adminForm');
-
-    adminBtn.addEventListener('click', () => {
-        adminModal.style.display = 'flex';
-    });
-
-    closeModal.addEventListener('click', () => {
-        adminModal.style.display = 'none';
-    });
-
-    adminForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const password = document.getElementById('adminPassword').value;
-        
-        try {
-            const response = await fetch('/api/admin/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ password })
-            });
-            
-            const result = await response.json();
-            
-            if (result.success) {
-                isAdmin = true;
-                alert('✅ Umefanikiwa kuingia kama Msimamizi!');
-                adminModal.style.display = 'none';
-                showAdminPanel();
-            } else {
-                alert('❌ Nenosiri si sahihi! Tafadhali jaribu tena.');
-            }
-        } catch (error) {
-            console.error('Login error:', error);
-            alert('❌ Hitilafu katika mfumo. Tafadhali jaribu tena.');
-        }
-    });
-
-    // Show admin panel
-    function showAdminPanel() {
-        // Create admin panel
-        const adminPanel = document.createElement('div');
-        adminPanel.id = 'adminPanel';
-        adminPanel.innerHTML = `
-            <div class="admin-panel">
-                <h3><i class="fas fa-cog"></i> Paneli ya Msimamizi</h3>
-                <div class="admin-actions">
-                    <button id="addMovieBtn" class="admin-action-btn">
-                        <i class="fas fa-plus"></i> Ongeza Filamu Mpya
-                    </button>
-                    <button id="viewMoviesBtn" class="admin-action-btn">
-                        <i class="fas fa-list"></i> Angalia Filamu Zote
-                    </button>
-                    <button id="logoutAdminBtn" class="admin-action-btn logout">
-                        <i class="fas fa-sign-out-alt"></i> Toka
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(adminPanel);
-        
-        // Add event listeners
-        document.getElementById('addMovieBtn').addEventListener('click', showAddMovieForm);
-        document.getElementById('viewMoviesBtn').addEventListener('click', showAllMovies);
-        document.getElementById('logoutAdminBtn').addEventListener('click', logoutAdmin);
-    }
-
-    // Show add movie form
-    function showAddMovieForm() {
-        const formHtml = `
-            <div class="modal" id="addMovieModal">
-                <div class="modal-content" style="max-width: 600px;">
-                    <span class="close-modal" onclick="closeModal('addMovieModal')">&times;</span>
-                    <h2 class="modal-title">Ongeza Filamu Mpya</h2>
-                    <form id="addMovieForm">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="movieTitle">Jina la Filamu</label>
-                                <input type="text" id="movieTitle" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="movieGenre">Aina</label>
-                                <input type="text" id="movieGenre" required>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="movieYear">Mwaka</label>
-                                <input type="text" id="movieYear" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="movieRating">Ukadiriaji</label>
-                                <input type="text" id="movieRating" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="movieCategory">Kategoria</label>
-                            <select id="movieCategory" required>
-                                <option value="trending">Zilizopendwa</option>
-                                <option value="hollywood">Hollywood</option>
-                                <option value="bollywood">Bollywood</option>
-                                <option value="swahili">Kiswahili</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="movieDescription">Maelezo</label>
-                            <textarea id="movieDescription" rows="3" required></textarea>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="moviePoster">Picha (URL)</label>
-                                <input type="url" id="moviePoster" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="movieBackdrop">Picha ya Nyuma (URL)</label>
-                                <input type="url" id="movieBackdrop" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>
-                                <input type="checkbox" id="movieFree" checked>
-                                Filamu ya Bure
-                            </label>
-                        </div>
-                        <button type="submit" class="submit-btn">Ongeza Filamu</button>
-                    </form>
-                </div>
-            </div>
-        `;
-        
-        document.body.insertAdjacentHTML('beforeend', formHtml);
-        document.getElementById('addMovieModal').style.display = 'flex';
-        
-        document.getElementById('addMovieForm').addEventListener('submit', addNewMovie);
-    }
-
-    // Add new movie
-    async function addNewMovie(e) {
-        e.preventDefault();
-        
-        const newMovie = {
-            title: document.getElementById('movieTitle').value,
-            genre: document.getElementById('movieGenre').value,
-            year: document.getElementById('movieYear').value,
-            rating: document.getElementById('movieRating').value,
-            category: document.getElementById('movieCategory').value,
-            description: document.getElementById('movieDescription').value,
-            poster: document.getElementById('moviePoster').value,
-            backdrop: document.getElementById('movieBackdrop').value,
-            free: document.getElementById('movieFree').checked
-        };
-        
-        try {
-            const response = await fetch('/api/admin/movies', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(newMovie)
-            });
-            
-            const result = await response.json();
-            
-            if (result.success) {
-                alert('✅ Filamu imeongezwa kikamilifu!');
-                closeModal('addMovieModal');
-                // Reload movies
-                loadMovies();
-            } else {
-                alert('❌ Hitilafu katika kuongeza filamu.');
-            }
-        } catch (error) {
-            console.error('Add movie error:', error);
-            alert('❌ Hitilafu katika mfumo. Tafadhali jaribu tena.');
-        }
-    }
-
-    // Show all movies for management
-    function showAllMovies() {
-        const moviesHtml = `
-            <div class="modal" id="allMoviesModal">
-                <div class="modal-content" style="max-width: 800px; max-height: 80vh; overflow-y: auto;">
-                    <span class="close-modal" onclick="closeModal('allMoviesModal')">&times;</span>
-                    <h2 class="modal-title">Usimamizi wa Filamu (${allMovies.length})</h2>
-                    <div class="movies-management">
-                        ${allMovies.map(movie => `
-                            <div class="movie-management-item">
-                                <img src="${movie.poster}" alt="${movie.title}" style="width: 60px; height: 80px; object-fit: cover;">
-                                <div class="movie-management-info">
-                                    <h4>${movie.title}</h4>
-                                    <p>${movie.genre} • ${movie.year} • ${movie.category}</p>
-                                </div>
-                                <div class="movie-management-actions">
-                                    <button class="btn-small btn-danger" onclick="deleteMovie(${movie.id})">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.body.insertAdjacentHTML('beforeend', moviesHtml);
-        document.getElementById('allMoviesModal').style.display = 'flex';
-    }
-
-    // Delete movie
-    window.deleteMovie = async function(movieId) {
-        if (confirm('Je, una uhakika unataka kufuta filamu hii?')) {
-            try {
-                const response = await fetch(`/api/admin/movies/${movieId}`, {
-                    method: 'DELETE'
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    alert('✅ Filamu imefutwa kikamilifu!');
-                    closeModal('allMoviesModal');
-                    // Reload movies
-                    loadMovies();
-                }
-            } catch (error) {
-                console.error('Delete movie error:', error);
-                alert('❌ Hitilafu katika kufuta filamu.');
-            }
-        }
-    };
-
-    // Close modal
-    window.closeModal = function(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.remove();
-        }
-    };
-
-    // Logout admin
-    function logoutAdmin() {
-        isAdmin = false;
-        const adminPanel = document.getElementById('adminPanel');
-        if (adminPanel) {
-            adminPanel.remove();
-        }
-        alert('👋 Umetoka kwenye paneli ya msimamizi.');
-    }
-
-    // Close modal when clicking outside
-    window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) {
-            e.target.style.display = 'none';
-        }
-    });
-
-    // Initialize
-    loadMovies();
-});
+// init on page load
+document.addEventListener('DOMContentLoaded', async ()=>{
+  if(window.location.pathname.endsWith('admin.html')){
+    await loadMovies()
+    adminInit()
+    return
+  }
+  await loadMovies()
+})
