@@ -6,7 +6,7 @@ const FileSync = require('lowdb/adapters/FileSync');
 const cors = require('cors');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
 // Middleware
 app.use(cors());
