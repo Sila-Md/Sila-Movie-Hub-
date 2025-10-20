@@ -1,0 +1,76 @@
+{
+  "movies": [
+    {
+      "id": "1",
+      "title": "Extraction 2",
+      "description": "An action-packed rescue mission.",
+      "thumbnail": "assets/posters/extraction2.jpg",
+      "source": "https://drive.google.com/file/d/EXAMPLE_DRIVE_FILE/view?usp=sharing",
+      "type": "google-drive",
+      "trending": true
+    },
+    {
+      "id": "2",
+      "title": "Fast X",
+      "description": "The latest from the Fast & Furious saga.",
+      "thumbnail": "assets/posters/fastx.jpg",
+      "source": "https://example.com/stream/fastx.m3u8",
+      "type": "m3u8",
+      "trending": true
+    },
+    {
+      "id": "4",
+      "title": "Avatar: The Way of Water",
+      "description": "Epic sci-fi adventure in Pandora.",
+      "thumbnail": "assets/posters/avatar.jpg",
+      "source": "https://example.com/media/avatar.mp4",
+      "type": "mp4",
+      "trending": false
+    },
+    {
+      "id": "5",
+      "title": "RRR",
+      "description": "Bollywood epic of friendship and rebellion.",
+      "thumbnail": "assets/posters/rrr.jpg",
+      "source": "https://drive.google.com/file/d/EXAMPLE_RRR/view?usp=sharing",
+      "type": "google-drive",
+      "trending": true
+    },
+    {
+      "id": "3",
+      "title": "Pathaan",
+      "description": "High-octane Bollywood spy thriller.",
+      "thumbnail": "assets/posters/pathaan.jpg",
+      "source": "https://example.com/stream/pathaan.m3u8",
+      "type": "m3u8",
+      "trending": false
+    },
+    {
+      "id": "6",
+      "title": "Mapenzi ya Kitoto",
+      "description": "Swahili romance story.",
+      "thumbnail": "assets/posters/mapenzi.jpg",
+      "source": "https://drive.google.com/file/d/EXAMPLE_SWAHILI/view?usp=sharing",
+      "type": "google-drive",
+      "trending": false
+    },
+    {
+      "id": "7",
+      "title": "Mission Kisasi",
+      "description": "Swahili action thriller.",
+      "thumbnail": "assets/posters/kisasi.jpg",
+      "source": "https://example.com/stream/kisasi.m3u8",
+      "type": "m3u8",
+      "trending": true
+    },
+    {
+      "id": "8",
+      "title": "Black Panther: Wakanda Forever",
+      "description": "Marvel sequel.",
+      "thumbnail": "assets/posters/wakanda.jpg",
+      "source": "https://drive.google.com/file/d/EXAMPLE_WAK/view?usp=sharing",
+      "type": "google-drive",
+      "trending": true
+    }
+  ]
+}
