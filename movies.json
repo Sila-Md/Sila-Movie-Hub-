@@ -86,9 +86,9 @@
       "rating": "4.1",
       "category": "swahili",
       "description": "Comedy ya kisiasa inayochochea ubishi.",
-      "videoUrl": "/videos/mstahiki_meya.mp4",
-      "poster": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-      "backdrop": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+      "videoUrl": "https://files.catbox.moe/w9x2g2.mp4",
+      "poster": "https://files.catbox.moe/ebj284.jpg?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+      "backdrop": "https://files.catbox.moe/ebj284.jpg?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
       "free": true
     },
     {
