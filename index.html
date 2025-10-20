@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SilaMovieHub | Filamu Bora za Kibenki</title>
+    <style>
+        /* CSS YOTE IMEJUMULISHWA HAPA */
+        :root {
+            --primary-color: #e50914;
+            --secondary-color: #141414;
+            --accent-color: #00a8ff;
+            --text-color: #ffffff;
+            --dark-bg: #0f0f0f;
+            --card-bg: #1a1a1a;
+            --glow-color: rgba(229, 9, 20, 0.7);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        /* Header Styles */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+            transition: background-color 0.3s;
+        }
+
+        .scrolled {
+            background-color: var(--secondary-color);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-shadow: 0 0 10px var(--glow-color);
+        }
+
+        .logo span {
+            color: var(--text-color);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 20px;
+        }
+
+        nav ul li a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: var(--primary-color);
+        }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-box {
+            position: relative;
+            margin-right: 20px;
+        }
+
+        .search-box input {
+            background: rgba(0,0,0,0.7);
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 15px;
+            border-radius: 4px;
+            color: white;
+            width: 200px;
+            transition: width 0.3s;
+        }
+
+        .search-box input:focus {
+            width: 250px;
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .admin-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .admin-btn:hover {
+            background: #f40612;
+        }
+
+        /* Hero Slider */
+        .hero-slider {
+            position: relative;
+            height: 80vh;
+            overflow: hidden;
+            margin-top: 80px;
+        }
+
+        .slides-container {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+            height: 100%;
+        }
+
+        .slide {
+            min-width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 0 50px;
+        }
+
+        .slide-content {
+            max-width: 600px;
+            z-index: 2;
+        }
+
+        .slide-title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .slide-description {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .slide-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .play-btn, .info-btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .play-btn {
+            background: var(--text-color);
+            color: var(--secondary-color);
+        }
+
+        .play-btn:hover {
+            background: rgba(255,255,255,0.8);
+        }
+
+        .info-btn {
+            background: rgba(109, 109, 110, 0.7);
+            color: var(--text-color);
+        }
+
+        .info-btn:hover {
+            background: rgba(109, 109, 110, 0.5);
+        }
+
+        .slide-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            z-index: 1;
+        }
+
+        .slide-backdrop::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.1) 100%);
+        }
+
+        .slider-controls {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 3;
+        }
+
+        .slider-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .slider-dot.active {
+            background: var(--primary-color);
+            box-shadow: 0 0 10px var(--glow-color);
+        }
+
+        /* Movie Sections */
+        .movie-section {
+            padding: 40px 50px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .movies-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            padding: 10px 0;
+            scrollbar-width: thin;
+        }
+
+        .movies-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .movies-container::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        .movie-card {
+            min-width: 200px;
+            background: var(--card-bg);
+            border-radius: 4px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .movie-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--glow-color);
+            z-index: 10;
+        }
+
+        .movie-poster {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+
+        .movie-info {
+            padding: 15px;
+        }
+
+        .movie-title {
+            font-size: 1rem;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .movie-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+
+        /* Admin Login Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--secondary-color);
+            padding: 30px;
+            border-radius: 8px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 0 20px var(--glow-color);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            color: white;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #f40612;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .close-modal:hover {
+            color: white;
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 50px;
+            background: var(--secondary-color);
+            margin-top: 50px;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .footer-section {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .footer-title {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: #aaa;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--text-color);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+        .social-icon:hover {
+            background: var(--primary-color);
+        }
+
+        .copyright {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #aaa;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header {
+                padding: 15px 20px;
+            }
+
+            .logo {
+                font-size: 24px;
+            }
+
+            nav ul {
+                display: none;
+            }
+
+            .search-box input {
+                width: 150px;
+            }
+
+            .hero-slider {
+                height: 60vh;
+            }
+
+            .slide-title {
+                font-size: 2rem;
+            }
+
+            .slide-description {
+                font-size: 1rem;
+            }
+
+            .movie-section {
+                padding: 30px 20px;
+            }
+
+            .movie-card {
+                min-width: 150px;
+            }
+
+            .movie-poster {
+                height: 225px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header id="header">
+        <div class="logo">Sila<span>MovieHub</span></div>
+        <nav>
+            <ul>
+                <li><a href="#" class="active">Nyumbani</a></li>
+                <li><a href="#">Filamu</a></li>
+                <li><a href="#">TV Shows</a></li>
+                <li><a href="#">Mpya</a></li>
+                <li><a href="#">Orodha Yangu</a></li>
+            </ul>
+        </nav>
+        <div class="user-actions">
+            <div class="search-box">
+                <input type="text" placeholder="Tafuta...">
+            </div>
+            <button class="admin-btn" id="adminBtn">Admin</button>
+        </div>
+    </header>
+
+    <!-- Hero Slider -->
+    <section class="hero-slider">
+        <div class="slides-container" id="slidesContainer">
+            <!-- Slides will be dynamically added here -->
+        </div>
+        <div class="slider-controls" id="sliderControls">
+            <!-- Dots will be dynamically added here -->
+        </div>
+    </section>
+
+    <!-- Movie Sections -->
+    <section class="movie-section">
+        <h2 class="section-title">Filamu Zilizopendwa</h2>
+        <div class="movies-container" id="trendingMovies">
+            <!-- Trending movies will be dynamically added here -->
+        </div>
+    </section>
+
+    <section class="movie-section">
+        <h2 class="section-title">Hollywood</h2>
+        <div class="movies-container" id="hollywoodMovies">
+            <!-- Hollywood movies will be dynamically added here -->
+        </div>
+    </section>
+
+    <section class="movie-section">
+        <h2 class="section-title">Bollywood</h2>
+        <div class="movies-container" id="bollywoodMovies">
+            <!-- Bollywood movies will be dynamically added here -->
+        </div>
+    </section>
+
+    <section class="movie-section">
+        <h2 class="section-title">Filamu za Kiswahili</h2>
+        <div class="movies-container" id="swahiliMovies">
+            <!-- Swahili movies will be dynamically added here -->
+        </div>
+    </section>
+
+    <!-- Admin Login Modal -->
+    <div class="modal" id="adminModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <h2 class="modal-title">Ingia kama Msimamizi</h2>
+            <form id="adminForm">
+                <div class="form-group">
+                    <label for="adminPassword">Nenosiri la Msimamizi</label>
+                    <input type="password" id="adminPassword" placeholder="Weka nenosiri hapa">
+                </div>
+                <button type="submit" class="submit-btn">Ingia</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3 class="footer-title">SilaMovieHub</h3>
+                <p>Jukwaa bora la kutazama filamu za Kibenki. Tunatoa filamu bora za Hollywood, Bollywood na Kiswahili.</p>
+                <div class="social-links">
+                    <a href="#" class="social-icon">FB</a>
+                    <a href="#" class="social-icon">IG</a>
+                    <a href="#" class="social-icon">TW</a>
+                    <a href="#" class="social-icon">YT</a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3 class="footer-title">Viungo</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Nyumbani</a></li>
+                    <li><a href="#">Kuhusu Sisi</a></li>
+                    <li><a href="#">Wasiliana Nasi</a></li>
+                    <li><a href="#">Sheria na Masharti</a></li>
+                    <li><a href="#">Faragha</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3 class="footer-title">Aina za Filamu</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Hollywood</a></li>
+                    <li><a href="#">Bollywood</a></li>
+                    <li><a href="#">Kiswahili</a></li>
+                    <li><a href="#">Vitendo</a></li>
+                    <li><a href="#">Mapenzi</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3 class="footer-title">Usaidizi</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Maswali Yanayoulizwa Mara Kwa Mara</a></li>
+                    <li><a href="#">Msaada wa Kiteknolojia</a></li>
+                    <li><a href="#">Wasiliana Nasi</a></li>
+                    <li><a href="#">Ripoti Tatizo</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2023 SilaMovieHub. Haki zote zimehifadhiwa.</p>
+        </div>
+    </footer>
+
+    <script>
+        // JavaScript YOTE IMEJUMULISHWA HAPA
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sample data for movies
+            const moviesData = {
+                trending: [
+                    { id: 1, title: "Mwamba wa Maisha", genre: "Drama", year: "2023", rating: "4.5", category: "trending", backdrop: "https://via.placeholder.com/800x450/333333/FFFFFF?text=Mwamba+wa+Maisha", poster: "https://via.placeholder.com/200x300/333333/FFFFFF?text=Mwamba+wa+Maisha" },
+                    { id: 2, title: "Kivuli cha Mapenzi", genre: "Romance", year: "2023", rating: "4.2", category: "trending", backdrop: "https://via.placeholder.com/800x450/444444/FFFFFF?text=Kivuli+cha+Mapenzi", poster: "https://via.placeholder.com/200x300/444444/FFFFFF?text=Kivuli+cha+Mapenzi" },
+                    { id: 3, title: "Black Panther", genre: "Action", year: "2022", rating: "4.8", category: "trending", backdrop: "https://via.placeholder.com/800x450/555555/FFFFFF?text=Black+Panther", poster: "https://via.placeholder.com/200x300/555555/FFFFFF?text=Black+Panther" },
+                    { id: 4, title: "Avatar 2", genre: "Sci-Fi", year: "2022", rating: "4.7", category: "trending", backdrop: "https://via.placeholder.com/800x450/666666/FFFFFF?text=Avatar+2", poster: "https://via.placeholder.com/200x300/666666/FFFFFF?text=Avatar+2" },
+                    { id: 5, title: "Top Gun: Maverick", genre: "Action", year: "2022", rating: "4.6", category: "trending", backdrop: "https://via.placeholder.com/800x450/777777/FFFFFF?text=Top+Gun", poster: "https://via.placeholder.com/200x300/777777/FFFFFF?text=Top+Gun" },
+                    { id: 6, title: "Spider-Man: No Way Home", genre: "Action", year: "2021", rating: "4.9", category: "trending", backdrop: "https://via.placeholder.com/800x450/888888/FFFFFF?text=Spider-Man", poster: "https://via.placeholder.com/200x300/888888/FFFFFF?text=Spider-Man" }
+                ],
+                hollywood: [
+                    { id: 7, title: "Avengers: Endgame", genre: "Action", year: "2019", rating: "4.9", category: "hollywood", poster: "https://via.placeholder.com/200x300/222222/FFFFFF?text=Avengers" },
+                    { id: 8, title: "The Batman", genre: "Action", year: "2022", rating: "4.3", category: "hollywood", poster: "https://via.placeholder.com/200x300/333333/FFFFFF?text=The+Batman" },
+                    { id: 9, title: "Jurassic World", genre: "Adventure", year: "2022", rating: "4.1", category: "hollywood", poster: "https://via.placeholder.com/200x300/444444/FFFFFF?text=Jurassic+World" },
+                    { id: 10, title: "Doctor Strange", genre: "Fantasy", year: "2022", rating: "4.4", category: "hollywood", poster: "https://via.placeholder.com/200x300/555555/FFFFFF?text=Doctor+Strange" },
+                    { id: 11, title: "Black Adam", genre: "Action", year: "2022", rating: "3.9", category: "hollywood", poster: "https://via.placeholder.com/200x300/666666/FFFFFF?text=Black+Adam" },
+                    { id: 12, title: "Thor: Love and Thunder", genre: "Action", year: "2022", rating: "4.0", category: "hollywood", poster: "https://via.placeholder.com/200x300/777777/FFFFFF?text=Thor" }
+                ],
+                bollywood: [
+                    { id: 13, title: "RRR", genre: "Action", year: "2022", rating: "4.7", category: "bollywood", poster: "https://via.placeholder.com/200x300/222222/FFFFFF?text=RRR" },
+                    { id: 14, title: "Brahmastra", genre: "Fantasy", year: "2022", rating: "4.2", category: "bollywood", poster: "https://via.placeholder.com/200x300/333333/FFFFFF?text=Brahmastra" },
+                    { id: 15, title: "KGF Chapter 2", genre: "Action", year: "2022", rating: "4.6", category: "bollywood", poster: "https://via.placeholder.com/200x300/444444/FFFFFF?text=KGF+2" },
+                    { id: 16, title: "Vikram Vedha", genre: "Action", year: "2022", rating: "4.3", category: "bollywood", poster: "https://via.placeholder.com/200x300/555555/FFFFFF?text=Vikram+Vedha" },
+                    { id: 17, title: "Pathaan", genre: "Action", year: "2023", rating: "4.5", category: "bollywood", poster: "https://via.placeholder.com/200x300/666666/FFFFFF?text=Pathaan" },
+                    { id: 18, title: "Drishyam 2", genre: "Thriller", year: "2022", rating: "4.4", category: "bollywood", poster: "https://via.placeholder.com/200x300/777777/FFFFFF?text=Drishyam+2" }
+                ],
+                swahili: [
+                    { id: 19, title: "Mstahiki Meya", genre: "Comedy", year: "2022", rating: "4.1", category: "swahili", poster: "https://via.placeholder.com/200x300/222222/FFFFFF?text=Mstahiki+Meya" },
+                    { id: 20, title: "Kisasi Hapana", genre: "Drama", year: "2021", rating: "4.3", category: "swahili", poster: "https://via.placeholder.com/200x300/333333/FFFFFF?text=Kisasi+Hapana" },
+                    { id: 21, title: "Mapenzi ya Kijana", genre: "Romance", year: "2023", rating: "4.0", category: "swahili", poster: "https://via.placeholder.com/200x300/444444/FFFFFF?text=Mapenzi+ya+Kijana" },
+                    { id: 22, title: "Mke wa Kando", genre: "Drama", year: "2022", rating: "4.2", category: "swahili", poster: "https://via.placeholder.com/200x300/555555/FFFFFF?text=Mke+wa+Kando" },
+                    { id: 23, title: "Mwanamke Mjanja", genre: "Comedy", year: "2021", rating: "4.4", category: "swahili", poster: "https://via.placeholder.com/200x300/666666/FFFFFF?text=Mwanamke+Mjanja" },
+                    { id: 24, title: "Mpenzi Wangu", genre: "Romance", year: "2023", rating: "4.1", category: "swahili", poster: "https://via.placeholder.com/200x300/777777/FFFFFF?text=Mpenzi+Wangu" }
+                ]
+            };
+
+            // Initialize the slider with trending movies
+            const sliderContainer = document.getElementById('slidesContainer');
+            const sliderControls = document.getElementById('sliderControls');
+            
+            moviesData.trending.forEach((movie, index) => {
+                // Create slide
+                const slide = document.createElement('div');
+                slide.className = 'slide';
+                slide.innerHTML = `
+                    <div class="slide-backdrop" style="background-image: url('${movie.backdrop}')"></div>
+                    <div class="slide-content">
+                        <h1 class="slide-title">${movie.title}</h1>
+                        <p class="slide-description">Filamu ya ${movie.genre} iliyotoka mwaka ${movie.year}. Imepata ukadiriaji wa nyota ${movie.rating}/5.</p>
+                        <div class="slide-actions">
+                            <button class="play-btn"><i class="fas fa-play"></i> Cheza Sasa</button>
+                            <button class="info-btn"><i class="fas fa-info-circle"></i> Maelezo Zaidi</button>
+                        </div>
+                    </div>
+                `;
+                sliderContainer.appendChild(slide);
+
+                // Create slider dot
+                const dot = document.createElement('div');
+                dot.className = `slider-dot ${index === 0 ? 'active' : ''}`;
+                dot.dataset.index = index;
+                dot.addEventListener('click', () => goToSlide(index));
+                sliderControls.appendChild(dot);
+            });
+
+            // Populate movie sections
+            function populateMovieSection(containerId, movies) {
+                const container = document.getElementById(containerId);
+                
+                movies.forEach(movie => {
+                    const movieCard = document.createElement('div');
+                    movieCard.className = 'movie-card';
+                    movieCard.innerHTML = `
+                        <img src="${movie.poster}" alt="${movie.title}" class="movie-poster">
+                        <div class="movie-info">
+                            <h3 class="movie-title">${movie.title}</h3>
+                            <div class="movie-meta">
+                                <span>${movie.year}</span>
+                                <span>★ ${movie.rating}</span>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(movieCard);
+                });
+            }
+
+            // Populate all sections
+            populateMovieSection('trendingMovies', moviesData.trending);
+            populateMovieSection('hollywoodMovies', moviesData.hollywood);
+            populateMovieSection('bollywoodMovies', moviesData.bollywood);
+            populateMovieSection('swahiliMovies', moviesData.swahili);
+
+            // Slider functionality
+            let currentSlide = 0;
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelectorAll('.slider-dot');
+            let slideInterval;
+
+            function goToSlide(index) {
+                currentSlide = index;
+                sliderContainer.style.transform = `translateX(-${currentSlide * 100}%)`;
+                
+                // Update active dot
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === currentSlide);
+                });
+                
+                // Reset auto slide timer
+                resetSlideInterval();
+            }
+
+            function nextSlide() {
+                currentSlide = (currentSlide + 1) % slides.length;
+                goToSlide(currentSlide);
+            }
+
+            function resetSlideInterval() {
+                clearInterval(slideInterval);
+                slideInterval = setInterval(nextSlide, 5000);
+            }
+
+            // Start auto sliding
+            resetSlideInterval();
+
+            // Header scroll effect
+            const header = document.getElementById('header');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+
+            // Admin modal functionality
+            const adminBtn = document.getElementById('adminBtn');
+            const adminModal = document.getElementById('adminModal');
+            const closeModal = document.getElementById('closeModal');
+            const adminForm = document.getElementById('adminForm');
+
+            adminBtn.addEventListener('click', () => {
+                adminModal.style.display = 'flex';
+            });
+
+            closeModal.addEventListener('click', () => {
+                adminModal.style.display = 'none';
+            });
+
+            adminForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const password = document.getElementById('adminPassword').value;
+                
+                if (password === 'Sila25') {
+                    alert('Umefanikiwa kuingia kama Msimamizi!');
+                    adminModal.style.display = 'none';
+                    // Here you would typically redirect to admin panel
+                } else {
+                    alert('Nenosiri si sahihi! Tafadhali jaribu tena.');
+                }
+            });
+
+            // Close modal when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === adminModal) {
+                    adminModal.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
