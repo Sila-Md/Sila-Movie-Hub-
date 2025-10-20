@@ -1,0 +1,22 @@
+{
+  "name": "SilaMovieHub",
+  "description": "Netflix-style movie streaming platform",
+  "repository": "https://github.com/Sila-Md/Sila-Movie-Hub",
+  "logo": "https://raw.githubusercontent.com/Sila-Md/Sila-Movie-Hub/main/logo.png",
+  "keywords": ["node", "express", "movies", "streaming", "netflix-clone"],
+  "env": {
+    "NODE_ENV": {
+      "description": "Environment",
+      "value": "production"
+    },
+    "PORT": {
+      "description": "Port for the server",
+      "value": "3000"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ]
+}
