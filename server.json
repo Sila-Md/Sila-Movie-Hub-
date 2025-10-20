@@ -143,11 +143,18 @@ app.get('/api/search', (req, res) => {
     res.json(movies);
 });
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.json({ 
+        status: 'OK', 
+        message: 'SilaMovieHub is running', 
+        timestamp: new Date().toISOString() 
+    });
+});
+
 // Serve sample video files
 app.get('/videos/:filename', (req, res) => {
     const { filename } = req.params;
-    // For demo purposes, we'll serve a placeholder message
-    // In production, you would serve actual video files
     res.json({ 
         message: 'Video streaming endpoint',
         filename: filename,
@@ -155,9 +162,21 @@ app.get('/videos/:filename', (req, res) => {
     });
 });
 
+// Handle 404
+app.use('*', (req, res) => {
+    res.status(404).json({ error: 'Endpoint not found' });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: 'Something went wrong!' });
+});
+
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`🎬 SilaMovieHub server running on port ${PORT}`);
     console.log(`🔗 http://localhost:${PORT}`);
     console.log(`🔐 Admin password: Sila25`);
+    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
